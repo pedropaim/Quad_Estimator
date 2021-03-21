@@ -91,6 +91,24 @@ pitchEst = attitudeTau / (attitudeTau + dtIMU) * (predictedPitch)+dtIMU / (attit
 
 ## Step 3 - Prediction Step
 
+QuadEstimatorEKF.cpp file
+PredictStateFunction() function
+
+```
+const double CONST_GRAVITY = 9.81; // gravity in [m/s^2]
+    
+V3F Inertial = attitude.Rotate_BtoI(accel);
+    
+predictedState[0] = curState[0] + curState[3]*dt;
+predictedState[1] = curState[1] + curState[4]*dt;
+predictedState[2] = curState[2] + curState[5]*dt;
+predictedState[3] = curState[3] + Inertial.x*dt;
+predictedState[4] = curState[4] + Inertial.y*dt;
+predictedState[5] = curState[5] + Inertial.z*dt - CONST_GRAVITY*dt;
+predictedState[6] = curState[6];
+
+
+
 ## Step 4 - Magnetometer Update
 
 ## Step 5 - Closed Loop and GPS Update

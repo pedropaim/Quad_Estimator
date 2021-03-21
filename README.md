@@ -106,7 +106,7 @@ predictedState[3] = curState[3] + Inertial.x*dt;
 predictedState[4] = curState[4] + Inertial.y*dt;
 predictedState[5] = curState[5] + Inertial.z*dt - CONST_GRAVITY*dt;
 predictedState[6] = curState[6];
-
+```
 
 
 ## Step 4 - Magnetometer Update

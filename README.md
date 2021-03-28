@@ -58,8 +58,8 @@ QuadEstimatorEKF.cpp
 function UpdateFromIMU()
  
 ```
-float z_phi_dot = gyro.x + sin(rollEst)*tan(pitchEst)*gyro.y + cos(rollEst)*tan(pitchEst)*ekfState(6);
-float z_theta_dot = cos(rollEst)*gyro.y - sin(rollEst)*ekfState(6);    
+float z_phi_dot = gyro.x + sin(rollEst)*tan(pitchEst)*gyro.y + cos(rollEst)*tan(pitchEst)*gyro.z;
+float z_theta_dot = cos(rollEst)*gyro.y - sin(rollEst)*gyro.z;    
 float z_psi_dot = (sin(rollEst)/cos(pitchEst))*gyro.y + (cos(rollEst)/cos(pitchEst))*gyro.z;
 ```
 

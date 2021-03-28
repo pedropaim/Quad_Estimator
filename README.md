@@ -109,6 +109,40 @@ predictedState[6] = curState[6];
 ```
 
 
+```
+ RbgPrime(0,0) = -cos(pitch)*sin(yaw);
+ RbgPrime(0,1) = -sin(roll)*sin(pitch)*sin(yaw) - cos(roll)*cos(yaw);
+ RbgPrime(0,2) = -cos(roll)*sin(pitch)*sin(yaw) + sin(roll)*cos(yaw);
+ RbgPrime(1,0) = cos(pitch)*cos(yaw);
+ RbgPrime(1,1) = sin(roll)*sin(pitch)*cos(yaw) - cos(roll)*sin(yaw);
+ RbgPrime(1,2) = cos(roll)*sin(pitch)*cos(yaw) + sin(roll)*sin(yaw);
+ RbgPrime(2,0) = 0;
+ RbgPrime(2,1) = 0;
+ RbgPrime(2,2) = 0;
+```
+
+```
+  gPrime(0,3) = dt;
+  gPrime(1,4) = dt;
+  gPrime(2,5) = dt;
+  gPrime(3,6) = (RbgPrime(0,0)*accel.x + RbgPrime(0,1)*accel.y + RbgPrime(0,2)*accel.z)*dt;
+  gPrime(4,6) = (RbgPrime(1,0)*accel.x + RbgPrime(1,1)*accel.y + RbgPrime(1,2)*accel.z)*dt;
+  gPrime(5,6) = (RbgPrime(2,0)*accel.x + RbgPrime(2,1)*accel.y + RbgPrime(2,2)*accel.z)*dt;
+        
+  ekfCov = gPrime * ekfCov * gPrime.transpose() + Q;
+
+``` 
+
+
+```
+QPosXYStd = 0.025
+
+QVelXYStd = .25
+```
+
+
+
+
 ## Step 4 - Magnetometer Update
 
 ## Step 5 - Closed Loop and GPS Update

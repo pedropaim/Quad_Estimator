@@ -140,10 +140,21 @@ QPosXYStd = 0.025
 QVelXYStd = .25
 ```
 
-
-
-
 ## Step 4 - Magnetometer Update
+
+In the UpdateFromMag function :
+
+```
+zFromX(0) = ekfState(6);
+hPrime(0,6) = 1;
+```    
+
+To normalize the values, making sure that the difference between the measured value and the current state estimate is not computed the wrong way around the circle :
+
+```
+if ((z(0) - zFromX(0)) > F_PI) z(0) -= 2.f*F_PI;
+if ((z(0) - zFromX(0)) < -F_PI) z(0) += 2.f*F_PI;
+```
 
 ## Step 5 - Closed Loop and GPS Update
 

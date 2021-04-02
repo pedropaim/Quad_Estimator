@@ -156,6 +156,33 @@ if ((z(0) - zFromX(0)) > F_PI) z(0) -= 2.f*F_PI;
 if ((z(0) - zFromX(0)) < -F_PI) z(0) += 2.f*F_PI;
 ```
 
+QYawStd was tuned to 0.1 to obtain a better balance between long term drift and short term noise from the magnetometer.
+```
+QYawStd = .1
+```
+
 ## Step 5 - Closed Loop and GPS Update
 
+Implement EKF GPS Update in the UpdateFromGPS()
+
+```
+hPrime(0,0) = 1;
+hPrime(1,1) = 1;
+hPrime(2,2) = 1;
+hPrime(3,3) = 1;
+hPrime(4,4) = 1;
+hPrime(5,5) = 1;
+```
+
+```
+zFromX(0) = ekfState(0);
+zFromX(1) = ekfState(1);
+zFromX(2) = ekfState(2);
+zFromX(3) = ekfState(3);
+zFromX(4) = ekfState(4);
+zFromX(5) = ekfState(5);
+```
+
 ## Step 6 - Adding my Controller
+
+

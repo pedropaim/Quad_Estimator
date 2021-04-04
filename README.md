@@ -4,6 +4,8 @@ Udacity Autonomous Flight Nanodegree - Estimator Project
 
 ## Step 1 - Sensor Noise
 
+After running scenario 06_NoisySensors, two files were generated, Graph1.txt containing GPS X data and Graph2.txt containing Accelerometer X data. The following python script was used to treat Graph1.txt and extract the variance and standard deviation in the GPS X data.
+
 ```
 import numpy as np
 
@@ -26,6 +28,7 @@ print('GPS X variance = ',GPS_X_variance)
 print('GPS X standard deviation = ',GPS_X_std_dev)
 ```
 
+The following python script was used to treat Graph2.txt and extract the standard deviation in the Accelerometer X data.
 
 ```
 filename = 'Graph2.txt'
@@ -48,14 +51,18 @@ print('IMU AX variance = ',IMU_AX_variance)
 print('IMU AX standard deviation = ',IMU_AX_std_dev)
 ```
 
+The standard deviation values computed by the python scripts above were plugged into 6_SensorNoise.txt :
 
+```
+MeasuredStdDev_GPSPosXY = 0.7221291039946542
+MeasuredStdDev_AccelXY = 0.5119246115029601
+```
+
+These values approximately matched the values provided in SimulatedSensors.txt, and caused the standard deviation to capture approximately 68% of the respective measurements.
 
 ## Step 2 - Attitude Estimation
 
-Implemented according to section 7.1.2 Non-Linear Complementary Filter from the paper "Estimation for Quadrotors.
-
-QuadEstimatorEKF.cpp 
-function UpdateFromIMU()
+An improved attitude filter was implemented according to section 7.1.2 Non-Linear Complementary Filter from the paper "Estimation for Quadrotors. The following code was inserted in function UpdateFromIMU() in file QuadEstimatorEKF.cpp. Initially, a coordinate transformation is applied to the gyrometer measurements to convert them from the local to the global frame : 
  
 ```
 float z_phi_dot = gyro.x + sin(rollEst)*tan(pitchEst)*gyro.y + cos(rollEst)*tan(pitchEst)*gyro.z;
@@ -63,6 +70,7 @@ float z_theta_dot = cos(rollEst)*gyro.y - sin(rollEst)*gyro.z;
 float z_psi_dot = (sin(rollEst)/cos(pitchEst))*gyro.y + (cos(rollEst)/cos(pitchEst))*gyro.z;
 ```
 
+Then, the predicted pitch, roll and yaw values are computed by integrating the current pitch, roll and yaw estimates with the current changes in pitch, roll and yaw derived from gyrometer measurements.
 
 ```
 float predictedPitch = pitchEst + dtIMU*z_theta_dot;
@@ -70,17 +78,22 @@ float predictedRoll = rollEst + dtIMU*z_phi_dot;
 ekfState(6) = ekfState(6) + dtIMU * z_psi_dot;    // yaw
 ```
 
+The yaw values are then constrained to +/- pi. 
+
 ```
 if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
 if (ekfState(6) < -F_PI) ekfState(6) += 2.f*F_PI;
 ```
 
+An estimated attitude based on accelerometer measurements is computed as:
 
 ```
 // CALCULATE UPDATE
 accelRoll = atan2f(accel.y, accel.z);
 accelPitch = atan2f(-accel.x, 9.81f);
 ```
+
+The new roll and pitch estimates are then computed as a weighted sum between a the predicted attitude from gyrometer integration and estimated attitude from accelerometer measurements:
 
 ```
 // FUSE INTEGRATION AND UPDATE

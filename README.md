@@ -104,8 +104,7 @@ pitchEst = attitudeTau / (attitudeTau + dtIMU) * (predictedPitch)+dtIMU / (attit
 
 ## Step 3 - Prediction Step
 
-QuadEstimatorEKF.cpp file
-PredictStateFunction() function
+The following code was implemented in the PredictState() function in the QuadEstimatorEKF.cpp file :
 
 ```
 const double CONST_GRAVITY = 9.81; // gravity in [m/s^2]
@@ -121,6 +120,7 @@ predictedState[5] = curState[5] + Inertial.z*dt - CONST_GRAVITY*dt;
 predictedState[6] = curState[6];
 ```
 
+In function GetRbgPrim(), the partial derivative of the body-to-global rotation matrix was computed as :
 
 ```
  RbgPrime(0,0) = -cos(pitch)*sin(yaw);
@@ -134,6 +134,8 @@ predictedState[6] = curState[6];
  RbgPrime(2,2) = 0;
 ```
 
+The code corresponding to the prediction step was then integrated in the Predict() function. Initially, the g prime function is computed :
+
 ```
   gPrime(0,3) = dt;
   gPrime(1,4) = dt;
@@ -141,42 +143,46 @@ predictedState[6] = curState[6];
   gPrime(3,6) = (RbgPrime(0,0)*accel.x + RbgPrime(0,1)*accel.y + RbgPrime(0,2)*accel.z)*dt;
   gPrime(4,6) = (RbgPrime(1,0)*accel.x + RbgPrime(1,1)*accel.y + RbgPrime(1,2)*accel.z)*dt;
   gPrime(5,6) = (RbgPrime(2,0)*accel.x + RbgPrime(2,1)*accel.y + RbgPrime(2,2)*accel.z)*dt;
-        
+``` 
+
+Then, the g prime function is used to compute the predicted EKF covariance :
+
+``` 
   ekfCov = gPrime * ekfCov * gPrime.transpose() + Q;
 
 ``` 
-
+Process parameters QPosXYStd and QVelXYStd were tuned to capture the magnitude of the errors as : 
 
 ```
 QPosXYStd = 0.025
-
 QVelXYStd = .25
 ```
 
 ## Step 4 - Magnetometer Update
 
-In the UpdateFromMag function :
+The magnetometer update was implemented in function UpdateFromMag() as :
 
 ```
 zFromX(0) = ekfState(6);
 hPrime(0,6) = 1;
 ```    
 
-To normalize the values, making sure that the difference between the measured value and the current state estimate is not computed the wrong way around the circle :
+The values are then normalized to make sure that the difference between the measured value and the current state estimate is not computed the wrong way around the circle :
 
 ```
 if ((z(0) - zFromX(0)) > F_PI) z(0) -= 2.f*F_PI;
 if ((z(0) - zFromX(0)) < -F_PI) z(0) += 2.f*F_PI;
 ```
 
-QYawStd was tuned to 0.1 to obtain a better balance between long term drift and short term noise from the magnetometer.
+QYawStd was tuned to 0.1 to obtain a better balance between long term drift and short term noise from the magnetometer:
+
 ```
 QYawStd = .1
 ```
 
 ## Step 5 - Closed Loop and GPS Update
 
-Implement EKF GPS Update in the UpdateFromGPS()
+The EKF GPS Update was implemented in function UpdateFromGPS() as:
 
 ```
 hPrime(0,0) = 1;
@@ -197,5 +203,50 @@ zFromX(5) = ekfState(5);
 ```
 
 ## Step 6 - Adding my Controller
+
+The controller code from the Quadrotor Controller project was replaced into the current project. This required the control gains to be relaxed.
+
+The original control gains were :
+```
+# Position control gains
+kpPosXY = 25
+kpPosZ = 25
+KiPosZ = 35
+
+# Velocity control gains
+kpVelXY = 10
+kpVelZ = 10
+
+# Angle control gains
+kpBank = 12
+kpYaw = 5
+
+# Angle rate gains
+kpPQR = 50, 50, 10
+```
+
+The retuned control gains became :
+
+```
+# Position control gains
+kpPosXY = 6
+kpPosZ = 10
+KiPosZ = 12
+
+# Velocity control gains
+kpVelXY = 6
+kpVelZ = 6
+
+# Angle control gains
+kpBank = 4
+kpYaw = 2
+
+# Angle rate gains
+kpPQR = 20, 20, 4
+```
+
+
+
+
 
 
